@@ -32,6 +32,7 @@
 - SpringBoot
   - `spring-boot-starter`의 의존성 제공으로 서로 호환되는 버전의 모듈 조합을 제공
   - `spring-boot-starter-parent` 에서 여러 라이브러리를 사용하게 될 경우, 충돌이 발생하지 않도록 검증된 조합을 제공
+
 Auto Configuration: 스프링부트에서 지원하는 기능
 - 자동설정: 애플리케이션에 추가된 라이브러리를 실행하는데 필요한 환경 설정을 알아서 찾아줌
 - `@SpringBootApplication`
@@ -39,6 +40,8 @@ Auto Configuration: 스프링부트에서 지원하는 기능
   - `@EnableAutoConfiguration`: `AutoConfigurationImportSelector` 클래스가 META-INF에 있는 자동설정 imports 정보를 읽어 @Conditional 조건을 충족할 때 빈으로 컨테이너에 등록
   - `@ComponentScan`: @Component 클래스를 Bean으로 등록
     - @Controller, @RestController, @Service, @Repository, @Configuration
+
 스프링부트의 내장 WAS
 - `spring-boot-starter-web`: 내장된 톰캣(다른 Jetty등 웹서버 사용 가능)
+
 스프링부트의 모니터링: `SpringBoot Actuator` 로 시스템이 사용하는 스레드, 메모리, 세션등 모니터링 가능
