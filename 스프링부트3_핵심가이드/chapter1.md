@@ -1,4 +1,5 @@
 # 01. 스프링부트란?
+> keywords: `IoC`, `DI`, `AOP`, `@SpringBootApplication`, `Bean`, `Proxy pattern`, `spring-boot-starter`
 
 ## 스프링 프레임워크
 - 핵심 가치: 애플리케이션 개발에 필요한 기반을 제공해 개발자가 비즈니스 로직 구현에만 집중할 수 있게 끔 하는 것
