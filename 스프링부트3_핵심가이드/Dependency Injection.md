@@ -37,8 +37,48 @@
   - 의존성 주입
     - `@Autowired`, `@Qualifier`, `@Inject` 등을 통해 자동으로 필요한 Bean을 주입받음
     - 생성자 주입, 수정자 주입, 필드 주입도 가능
+      - **생성자 주입**: 객체가 생성될 때 필요한 의존성을 생성자의 파라미터로 전달받는 방식
+        - final 키워드를 사용하여 의존성을 불변하게 유지 가능
+        ```java
+        @Service
+        public class AService {
+            private final ARepository aRepository;
+
+            // Lombok @RequiredArgsConstructor를 사용하면 생략 가능
+            @Autowired
+            public AService(ARepository aRepository) {
+                this.aRepository = aRepository;
+            }
+        }
+        ```
+        - 장점: 불변성, 테스트 시점에 의존성 주입 누락을 컴파일 타임에서 바로 감지 가능, 순환 참조 문제도 생성자 주입시 빠르게 발견 가능
+          - SpringBoot 2.6 이상 버전부터는 Spring Framework 5.3 에서 순환 참조가 기본적으로 허용되지 않도록 변경됨
+            - 순환참조는 잘못된 설계, Di 컨테이너가 두개 이상의 빈을 생성할 때 서로가 서로를 필요로 하면 컨테이너는 어떤 순서로 빈을 만들어야 하는지 모름
+            - 순환 참조 발생시, `BeanCurrentlyInCreationException` 발생
+      - 필드 주입
+        ```java
+        @Service
+        public class AService {
+            @Autowired
+            private ARepository aRepository;
+        }
+        ```
+        - 단점: 테스트할 때, `ReflectionTestUtils` 등으로 강제 주입해야 함, 생성시점에 의존성이 없다면 NPE 발생 가능
+      - Setter(수정자) 주입
+        ```java
+        @Service
+        public class AService {
+            private ARepository aRepository;
+
+            @Autowired
+            public setRepository(ARepository aRepository) {
+                this.aRepository = aRepository;
+            }
+        }
+        ```
+        - 단점: set 메서드로 주입후 언제든지 객체를 변경할 수 있기 때문에 불변성이 없음
     - xml이나 자바 설정 클래스로도 주입 가능
-      ```
+      ```java
       @Configuration
       pulic class AppConfig {
           @Bean
@@ -50,3 +90,5 @@
       ```
   - 강한 결합에서 느슨한 결합
     - 객체가 서로 직접 생성하지 않고 인터페이스 기반으로 DI를 받으므로 코드 변경없이 구현체 교체가 가능
+
+## 정리
