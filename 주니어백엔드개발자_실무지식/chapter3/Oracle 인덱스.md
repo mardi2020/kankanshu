@@ -196,7 +196,7 @@ WHERE 조건;
   WHERE name = 'SMITH';
   ```
 2. 인덱스 풀스캔(INDEX_FFS)
-   ```sql
+  ```sql
   SELECT /*+ INDEX_FFS(e idx_emp_name) */
         name
   FROM employees e;
