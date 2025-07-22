@@ -26,6 +26,15 @@
       CREATE BITMAP INDEX idx_emp_gender
       ON employees(gender);
       ```
+    - Hash 인덱스
+      - 해시 함수를 사용해 키 값을 bucket에 매핑
+      - 특정 값에 대한 검색은 해시 함수 -> 버킷 -> 데이터 방식으로 **O(1)**에 가까운 속도로 빠르게 검색
+      - **정확히 일치하는 검색**에 매우 빠름 -> 범위 검색(>, <, BETWEEN)은 비효율적 -> 정렬되어 있지 않기 때문
+      - Oracle DB에서는 기본적으로 해시 인덱스를 제공하지 않고 Hash Cluster로 비슷한 기능을 구현한다고 함
+      ```sql
+      CREATE CLUSTER emp_cluster (emp_id NUMBER(5))
+      HASHKEYS 1000; -- 해시 버킷의 개수
+      ```
     - 유니크 인덱스
       - 인덱스 컬럼 값이 중복될 수 없음을 보장함 -> 즉, PRIMARY KEY, UNIQUE 제약조건 사용시 자동으로 생성되는 인덱스
       ```sql
