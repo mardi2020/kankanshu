@@ -83,8 +83,81 @@ SELECT * FROM employees WHERE job_id = 'CLERK';
 
 복합 인덱스 순서를 결정하는 법
 - 선택도가 높은 컬럼을 먼저 배치함
-
-### IN 조건과 인덱스 사용
-
   - Ex) dept_id보다 employee_id가 훨씬 다양한 값을 가진다면 (employee_id, dept_id) 순서가 효율적
   - **쿼리 패턴을 분석하여 WHERE 절에 가장 자주 등장하는 컬럼을 앞에 배치**
+ 
+### IN 조건과 인덱스 사용
+IN 조건은 사실상 **OR 조건을 여러번 실행하는 것과 동일**
+
+예를 들어 복합 인덱스 (dept_id, job_id)가 있다면,
+```sql
+SELECT *
+FROM employees
+WHERE dept_id IN (10, 20) AND job_id = 'CLERK';
+```
+위 쿼리의 실행계획을 보면
+```
+(dept_id=10 AND job_id='CLERK')
+OR
+(dept_id=20 AND job_id='CLERK')
+```
+- 선두 컬럼에 IN이 있어도 결국엔 인덱스를 활용하여 조회함
+- 하지만, 선두 컬럼이 없고 후행 컬럼인 job_id만 IN 조건이 붙으면 인덱스 사용 불가능
+
+### LIKE 조건과 인덱스 사용
+LIKE 조건은 **패턴의 시작 위치**가 중요함
+
+앞 부분이 고정된 경우(인덱스 사용 가능)
+```sql
+SELECT *
+FROM employees
+WHERE name LIKE 'A%';
+```
+- 'A'로 시작하는 데이터를 찾으므로 B-tree 인덱스를 이용해 빠르게 조회 가능
+- 'A~~~' 범위 검색이 가능하므로 인덱스 효율이 높음
+
+앞에 와일드카드가 있는 경우(인덱스 사용 불가능)
+```sql
+SELECT *
+FROM employees
+WHERE name LIKE '%SON';
+```
+- '%SON' 앞이 고정되어 있지 않아 FULL SCAN 유발
+- 이럴 때에는 함수 기반 인덱스나 리버스 인덱스를 사용하면 됨
+
+실행 계획 확인해보기
+```sql
+EXPLAIN PLAN FOR
+SELECT *
+FROM employees WHERE dept_id = 10 AND job_id IN ('CLERK', 'MANAGER');
+
+SELECT *
+FROM TABLE(DBMS_XPLAN.DISPLAY);
+```
+- 실행계획에서 INDEX RANGE SCAN, INDEX SKIP SCAN, FULL TABLE SCAN 등을 확인할 수 있음
+
+### 성능 최적화하기
+- LIKE '%value%' 처럼 앞에 %가 붙으면 인덱스를 사용할 수 없음
+  - **CONTAINS() (Oracle Text Index)나 INSTR() + 함수 기반 인덱스** 고려
+    ```sql
+    CREATE INDEX idx_emp_name_text
+    ON employees(name) INDEXTYPE IS CTXSYS.CONTEXT;
+  
+    SELECT * FROM employees
+    WHERE CONTAINS(name, 'SMITH') > 0;
+    ```
+    - CONTAINS(): 부분 검색, 단어 검색, 패턴 매칭에 매우 빠름
+      - 'SMITH'가 포함된 이름을 찾기 위해 FULL SCAN을 하지 않고 텍스트 인덱스를 사용
+      - CLOB, VARCHAR2 등 긴 텍스트 컬럼 검색에 적합함
+  - INSTR(): 특정 문자열이 어디 위치에 있는지 알려줌, 기본적으로 인덱스를 타지 않음
+    ```sql
+    SELECT * FROM employees
+    WHERE INSTR(name, 'SMITH') > 0;
+    ```
+    - name 컬럼안에 'SMITH'라는 문자열이 포함되어 있으면 해당 row를 반환
+    - INSTR()은 인덱스를 사용하지 않으나 함수기반 인덱스를 만들면 인덱스를 사용할 수 있음
+    - 하지만, 위 쿼리처럼 'SMITH'는 동적인 값이 아니고 고정된 값이기 때문에 **동적 검색어를 사용할 때는 매번 새로운 인덱스를 만들 수 없기 때문에 실용성이 떨어짐**
+      - 그래서 실무에서는 CONTAINS()를 더 활용함
+- IN 조건이 많으면(IN (1, 2, 3, ..., 1000))
+  - IN 대신 JOIN이나 EXISTS로 리팩토링하여 사용
+
