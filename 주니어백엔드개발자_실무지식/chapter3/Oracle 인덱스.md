@@ -203,7 +203,7 @@ WHERE 조건;
   ```
   - 테이블의 접근을 최소화하고 인덱스에서 바로 데이터를 반환할 수 있는 경우에 사용
 3. 인덱스 스킵 스캔 (INDEX_SS)
-```sql
+  ```sql
   SELECT /*+ INDEX_SS(e idx_emp_dept_job) */
         *
   FROM employees e
