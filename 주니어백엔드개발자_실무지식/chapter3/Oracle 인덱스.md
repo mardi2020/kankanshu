@@ -170,3 +170,46 @@ FROM TABLE(DBMS_XPLAN.DISPLAY);
 - IN 조건이 많으면(IN (1, 2, 3, ..., 1000))
   - IN 대신 JOIN이나 EXISTS로 리팩토링하여 사용
 
+### 인덱스 힌트
+- 인덱스 힌트의 필요성
+  - DB optimizer가 통계정보에 따라 FULL SCAN을 선택할 수 있는데, 특정 상황에서는 인덱스가 더 효율적인 경우가 있어 힌트로 개입
+  - Ex) 테이블의 통계정보가 오래되어 카디널리티 예측이 부정확할 때
+- ⚠️주의사항
+  - 힌트 남발 금지
+  - 힌트는 쿼리의 실행 계획을 고정하므로 데이터 분포가 변경되면 성능 저하 발생
+```sql
+SELECT /*+ INDEX(table_name index_name) */
+      컬럼들
+FROM 테이블명 table_name
+WHERE 조건;
+```
+- INDEX(..): 지정한 테이블과 인덱스를 강제로 사용
+- table_name: 테이블의 별칭(alias) 또는 테이블 명
+  - 별칭을 사용할 경우, 힌트에도 동일한 별칭 사용
+- index_name: 사용할 인덱스의 이름
+
+1. 특정 인덱스 강제 사용
+  ```sql
+  SELECT /*+ INDEX(e idx_emp_name) */
+        *
+  FROM employees e
+  WHERE name = 'SMITH';
+  ```
+2. 인덱스 풀스캔(INDEX_FFS)
+   ```sql
+  SELECT /*+ INDEX_FFS(e idx_emp_name) */
+        name
+  FROM employees e;
+  ```
+  - 테이블의 접근을 최소화하고 인덱스에서 바로 데이터를 반환할 수 있는 경우에 사용
+3. 인덱스 스킵 스캔 (INDEX_SS)
+```sql
+  SELECT /*+ INDEX_SS(e idx_emp_dept_job) */
+        *
+  FROM employees e
+  WHERE job_id = 'CLERK';
+  ```
+  - 원래는 (dept_id, job_id) 인덱스에서 dept_id 조건이 없으면 인덱스를 못쓰지만, 스킵 스캔으로 인덱스를 타게할 수 있음
+    - 효율은 보장되지 않음
+
+이외에도 인덱스 힌트가 여러개 있음(INDEX_ASC, INDEX_DESC, INDEX_COMBINE)
