@@ -36,3 +36,6 @@ FOR each row in larger table (Probe Input)
 - 인덱스가 없거나 비효율적인 경우
 - 전체 결과셋이 필요할 때
 - OLAP/DW 환경에서 대용량 처리
+
+### 관련 문서들
+[[PostgreSQL] Nested Loop Join을 HashJoin으로 개선하기](https://jojoldu.tistory.com/784)
