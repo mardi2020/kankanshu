@@ -45,6 +45,7 @@
         - $\alpha$: learning rate
         - 기울기에 음수를 곱해주기 때문에 계산을 수행할수록 기울기의 절대값이 낮은 쪽으로 점점 수렴하게 됨, 부호가 양수라면 수렴이 아니라 발산함
 
-- 차원의 확장(Multi variable linear regression)
-  - 데이터 차원이 늘어나면 어떻게 해야될까?
-  - Ex) X1(quiz1), X2(quiz2), X3(mid term), Y(final) 
+### 차원의 확장(Multi variable linear regression)
+> 데이터 차원이 늘어나면 어떻게 해야될까?
+  
+- Ex) X1(quiz1), X2(quiz2), X3(mid term), Y(final) 
